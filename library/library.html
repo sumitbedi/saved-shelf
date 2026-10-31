@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shelf</title>
+  <link rel="icon" href="../icons/32.png">
+  <link rel="stylesheet" href="library.css">
+</head>
+<body>
+  <aside class="side">
+    <div class="brand"><img src="../icons/32.png" alt="" width="20" height="20"> Shelf</div>
+    <nav aria-label="Shelves">
+      <button class="shelf" data-shelf="all"><span>All saves</span><b data-count="all"></b></button>
+      <button class="shelf" data-shelf="inbox"><span>Not in a collection</span><b data-count="inbox"></b></button>
+      <p class="side-label">Collections</p>
+      <div id="tags"></div>
+      <form id="new-tag" class="new-tag">
+        <input name="t" placeholder="New collection" aria-label="New collection name" maxlength="40" autocomplete="off">
+      </form>
+      <p class="side-label">Other</p>
+      <button class="shelf" data-shelf="unsaved"><span>Unsaved on LinkedIn</span><b data-count="unsaved"></b></button>
+    </nav>
+    <div class="side-foot">
+      <button id="open-import" class="link">Import from LinkedIn</button>
+      <button id="export" class="link">Back up</button>
+      <label class="link file">Restore<input id="restore" type="file" accept=".json,application/json" hidden></label>
+      <label class="switch"><input id="capture" type="checkbox" checked> Keep posts automatically</label>
+    </div>
+  </aside>
+
+  <main>
+    <header class="top">
+      <div class="searchbar">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg>
+        <input id="q" type="search" placeholder="Search posts, people, notes" aria-label="Search your shelf" autocomplete="off" spellcheck="false">
+        <kbd>/</kbd>
+      </div>
+      <div class="bar">
+        <p id="scope" class="scope" aria-live="polite"></p>
+        <div class="controls">
+          <button id="author-chip" class="chip" hidden></button>
+          <label class="sort">Sort
+            <select id="sort">
+              <option value="saved-new">Newest saved</option>
+              <option value="saved-old">Oldest saved</option>
+              <option value="linkedin">LinkedIn’s order</option>
+              <option value="added">Recently added here</option>
+              <option value="author">Author A–Z</option>
+            </select>
+          </label>
+        </div>
+      </div>
+    </header>
+
+    <section id="import" class="panel" hidden aria-label="Import from LinkedIn">
+      <h2>Bring in your whole history</h2>
+      <ol class="steps">
+        <li>On LinkedIn, open <b>Settings → Data privacy → Get a copy of your data</b>.</li>
+        <li>Choose <b>Saved items</b> (or the larger archive) and request it. LinkedIn emails you when it’s ready, often within minutes.</li>
+        <li>Unzip it and pick the saved items file (a <code>.csv</code>) here.</li>
+      </ol>
+      <p class="hint">The export has the link and the date you saved each post, not the text. Text gets added when you save posts or open your Saved page. Nothing leaves this computer.</p>
+      <label class="btn">Choose file<input id="file" type="file" accept=".csv,text/csv" hidden></label>
+      <div id="mapping" hidden></div>
+      <button class="link close" data-close="import">Close</button>
+    </section>
+
+    <section id="again" class="again" hidden aria-label="Worth another look">
+      <h2>Worth another look</h2>
+      <div class="again-row"></div>
+    </section>
+
+    <ol id="list" class="list" aria-label="Saved posts"></ol>
+    <div id="empty" class="empty" hidden></div>
+    <button id="more" class="more" hidden>Show more</button>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="library.js"></script>
+</body>
+</html>

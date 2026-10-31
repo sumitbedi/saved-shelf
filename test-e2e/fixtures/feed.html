@@ -1,0 +1,57 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Feed | LinkedIn</title>
+<style>body{font:14px system-ui;background:#f4f2ee;margin:0}section{max-width:600px;margin:24px auto}[role=listitem]{background:#fff;border-radius:8px;padding:16px;margin:0 0 10px;position:relative}
+.menu{position:absolute;background:#fff;box-shadow:0 4px 16px #0003;border-radius:8px;padding:6px}.menu [role=menuitem]{padding:8px 14px;cursor:pointer}</style></head>
+<body><main id="workspace"><section aria-label="Primary content"><div role="list" data-testid="mainFeed" id="feed"></div></section></main>
+<iframe id="preload" src="/preload/?_bprMode=vanilla" style="display:none;border:0;width:100%;height:700px"></iframe>
+<script src="/__fixtures/common.js"></script>
+<script>
+const feed = document.getElementById('feed');
+[1, 2, 4].forEach((i) => {
+  const [slug, name, text] = POSTS[i];
+  const d = document.createElement('div');
+  d.innerHTML = `<div data-display-contents="true"><div role="listitem" componentkey="update-card-${i}">
+    <a href="https://www.linkedin.com/in/${slug}/"><img alt=""></a>
+    <a href="https://www.linkedin.com/in/${slug}/"><span class="nm"></span></a>
+    <button type="button" class="ctl" aria-label="Open control menu for post by ${name}" aria-expanded="false">···</button>
+    <p><span data-testid="expandable-text-box"></span></p></div></div>`;
+  d.querySelector('.nm').textContent = name;
+  d.querySelector('[data-testid]').textContent = text;
+  if (i === 4) {   // a repost: someone else's post embedded inside this one, with its own id
+    const inner = document.createElement('div');
+    inner.setAttribute('data-urn', 'urn:li:activity:7520492219854786599');
+    inner.innerHTML = '<a href="https://www.linkedin.com/in/inner-author/"><span>Inner Author</span></a><span data-testid="expandable-text-box">The embedded original post text must not be taken as the reposter\'s.</span><a href="https://www.linkedin.com/feed/update/urn:li:activity:7520492219854786599/">link</a>';
+    d.querySelector('[role=listitem]').append(inner);
+  }
+  feed.append(d);
+});
+let menu = null;
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('.ctl');
+  if (b) {
+    menu?.remove();
+    b.setAttribute('aria-expanded', 'true');
+    menu = document.createElement('div'); menu.className = 'menu'; menu.setAttribute('role', 'menu');
+    const r = b.getBoundingClientRect();
+    menu.style.cssText = `top:${r.bottom + scrollY}px;left:${r.left}px`;
+    menu.innerHTML = `<div role="menuitem" tabindex="0" class="save"><svg id="bookmark-outline-medium" width="16" height="16"></svg> Save</div>
+      <div role="menuitem" tabindex="0"><svg id="link-medium" width="16" height="16"></svg> Copy link to post</div>`;
+    document.body.append(menu);   // drawn outside the post, like LinkedIn's portal menus
+    return;
+  }
+  if (e.target.closest('[role=menuitem]')) {   // bubble phase: after Shelf's capture-phase listener
+    menu?.remove(); menu = null;
+    document.querySelectorAll('.ctl[aria-expanded=true]').forEach((x) => x.setAttribute('aria-expanded', 'false'));
+    window.__savedClicks = (window.__savedClicks || 0) + 1;
+  }
+});
+// menus act on Enter like a click (the synthetic click is untrusted, so Shelf ignores it)
+document.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.closest('[role=menuitem]')) e.target.click(); });
+// single-page navigation to Saved, like LinkedIn's own links
+// the same link as LinkedIn really draws it from the home page: the address changes, the page itself goes in /preload/
+window.goSavedInFrame = () => {
+  history.pushState({}, '', '/my-items/saved-posts/');
+  const f = document.getElementById('preload'); f.style.display = 'block'; document.getElementById('workspace').hidden = true;
+  f.contentWindow.renderSaved(f.contentDocument.querySelector('main'));
+};
+window.goSaved = () => { history.pushState({}, '', '/my-items/saved-posts/'); document.title = 'Saved Posts | LinkedIn'; renderSaved(document.querySelector('main')); };
+</script></body></html>
